@@ -1,0 +1,36 @@
+pipe: 0 0 | read: 0 | write: 0
+pipe: 0 1 | read: 5 | write: 6
+pipe: 0 2 | read: 7 | write: 8
+pipe: 1 0 | read: 9 | write: 10
+pipe: 1 1 | read: 0 | write: 0
+pipe: 1 2 | read: 11 | write: 12
+pipe: 2 0 | read: 13 | write: 14
+pipe: 2 1 | read: 15 | write: 16
+pipe: 2 2 | read: 0 | write: 0
+id: 1 | my 0 | read: 5 | write: 10
+id: 1 | my 1 | read: 0 | write: 0
+id: 1 | my 2 | read: 15 | write: 12
+pipe: 0 0 | read: 0 | write: 0
+pipe: 0 1 | read: 5 | write: 6
+pipe: 0 2 | read: 7 | write: 8
+pipe: 1 0 | read: 9 | write: 10
+pipe: 1 1 | read: 0 | write: 0
+pipe: 1 2 | read: 11 | write: 12
+pipe: 2 0 | read: 13 | write: 14
+pipe: 2 1 | read: 15 | write: 16
+pipe: 2 2 | read: 0 | write: 0
+id: 2 | my 0 | read: 7 | write: 14
+id: 2 | my 1 | read: 11 | write: 16
+id: 2 | my 2 | read: 0 | write: 0
+pipe: 0 0 | read: 0 | write: 0
+pipe: 0 1 | read: 5 | write: 6
+pipe: 0 2 | read: 7 | write: 8
+pipe: 1 0 | read: 9 | write: 10
+pipe: 1 1 | read: 0 | write: 0
+pipe: 1 2 | read: 11 | write: 12
+pipe: 2 0 | read: 13 | write: 14
+pipe: 2 1 | read: 15 | write: 16
+pipe: 2 2 | read: 0 | write: 0
+id: 0 | my 0 | read: 0 | write: 0
+id: 0 | my 1 | read: 9 | write: 6
+id: 0 | my 2 | read: 13 | write: 8
