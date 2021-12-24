@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
+#include <memory.h>
 #include "pa2345.h"
 #include "pipe.h"
 #include "lamport.h"
@@ -25,7 +26,8 @@ Fork forks[MAX_PROCESS_ID + 1];
 bool isAwaitingFork[MAX_PROCESS_ID + 1];
 
 void printForks(const PipeInfo *info) {
-    if (true) {
+    bool shouldSkip = true;
+    if (shouldSkip) {
         return;
     }
 
@@ -46,17 +48,25 @@ void printForks(const PipeInfo *info) {
     printf("]\n");
 }
 
+int calculateAvailableForks(const PipeInfo * info) {
+    int availableForks = 0;
+    for (int i = 1; i < info->totalProcessesCount; ++i) {
+        if (i != info->selfId && forks[i].isMine) {
+            if (forks[i].isClean || !isAwaitingFork[i]) {
+                ++availableForks;
+            }
+        }
+    }
+
+    return availableForks;
+}
+
 void initialize(const PipeInfo *info) {
     currentState = Thinking;
     for (int i = 1; i < info->totalProcessesCount; ++i) {
-        if (i >= info->selfId) {
-            forks[i].isMine = true;
-            forks[i].isClean = true;
-        } else {
-            forks[i].isMine = false;
-            forks[i].isClean = false;
-        }
-        isAwaitingFork[i] = false;
+        forks[i].isMine = i >= info->selfId;
+        forks[i].isClean = !forks[i].isMine;
+        isAwaitingFork[i] = !forks[i].isMine;
     }
     isInitialized = true;
 }
@@ -69,39 +79,29 @@ int request_cs(const void *self) {
     printForks(info);
 
     currentState = Hungry;
+    Message message = {{0}};
+    message.s_header.s_magic = MESSAGE_MAGIC;
+    message.s_header.s_payload_len = 0;
+    message.s_header.s_type = CS_REQUEST;
+    message.s_header.s_local_time = increment_lamport_time();
     for (local_id i = 1; i < info->totalProcessesCount; ++i) {
-        if (i == info->selfId) {
-            continue;
-        }
-        if (!forks[i].isMine) {
-            Message message = {{0}};
-            message.s_header.s_magic = MESSAGE_MAGIC;
-            message.s_header.s_payload_len = 0;
-            message.s_header.s_type = CS_REQUEST;
-            message.s_header.s_local_time = increment_lamport_time();
+        if (i != info->selfId && !forks[i].isMine) {
+//            printf("%d: process %d requesting fork from %d\n", get_lamport_time(), info->selfId, i);
             send((void *) self, i, &message);
             isAwaitingFork[i] = false;
         }
     }
 
-    int total;
     do {
-        total = 1;
-        for (int i = 1; i < info->totalProcessesCount; ++i) {
-            if (i != info->selfId && forks[i].isMine) {
-                if (forks[i].isClean || !isAwaitingFork[i]) {
-                    ++total;
-                }
-            }
-        }
-        if (total == info->totalProcessesCount - 1) {
+        int availableForks = calculateAvailableForks(info);
+        int neededForks = info->totalProcessesCount - 2;
+        MessageInfo received_info = { info, 0 };
+        memset(&message, 0, sizeof(Message));
+
+        if (neededForks == availableForks && doneProcesses == info->totalProcessesCount - 2) {
             break;
-        } else {
-            printForks(info);
         }
 
-        MessageInfo received_info = { info, 0 };
-        Message message = { 0 };
         receive_any(&received_info, &message);
         switch (message.s_header.s_type) {
             case DONE:
@@ -121,17 +121,28 @@ int request_cs(const void *self) {
                     send((void *) self, received_info.sender, &message2);
                     isAwaitingFork[received_info.sender] = false;
 
+//                    printf("%d: process %d transferred fork to %d\n", get_lamport_time(), info->selfId, received_info.sender);
+
                     message2.s_header.s_type = CS_REQUEST;
-                    message2.s_header.s_local_time = increment_lamport_time();
                     send((void *) self, received_info.sender, &message2);
+
+//                    printf("%d: process %d requesting fork from %d\n", get_lamport_time(), info->selfId, received_info.sender);
                 }
                 break;
             case CS_REPLY:
+//                printf("%d: process %d received fork from %d\n", get_lamport_time(), info->selfId, received_info.sender);
                 forks[received_info.sender].isMine = true;
                 forks[received_info.sender].isClean = true;
+                printForks(info);
                 break;
         }
-    } while (total < info->totalProcessesCount - 1);
+        availableForks = calculateAvailableForks(info);
+        if (availableForks == neededForks) {
+            break;
+        } else {
+            printForks(info);
+        }
+    } while (true);
 //    printf("%d: start eating in %d\n", get_lamport_time(), info->selfId);
 
     currentState = Eating;
@@ -141,6 +152,7 @@ int request_cs(const void *self) {
 
 int release_cs(const void *self) {
     const PipeInfo *info = (PipeInfo *)self;
+//    printf("%d: releasing %d\n", get_lamport_time(), info->selfId);
     printForks(info);
     currentState = Thinking;
     for (int i = 1; i < info->totalProcessesCount; ++i) {
@@ -152,12 +164,14 @@ int release_cs(const void *self) {
     message.s_header.s_magic = MESSAGE_MAGIC;
     message.s_header.s_payload_len = 0;
     message.s_header.s_type = CS_REPLY;
-    message.s_header.s_type = increment_lamport_time();
+    message.s_header.s_local_time = increment_lamport_time();
     for (local_id i = 1; i < info->totalProcessesCount; ++i) {
         if (i != info->selfId && isAwaitingFork[i]) {
             forks[i].isMine = false;
             send((void *) info, i, &message);
             isAwaitingFork[i] = false;
+
+//            printf("%d: process %d transferred fork to %d\n", get_lamport_time(), info->selfId, i);
         }
     }
     printForks(info);

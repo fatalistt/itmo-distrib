@@ -3,6 +3,7 @@
 #include "ipc.h"
 #include "pipe.h"
 #include "lamport.h"
+#include "banking.h"
 #include <unistd.h>
 #include <time.h>
 #include <errno.h>
@@ -20,7 +21,7 @@ int send(void *self, local_id dst, const Message *msg) {
     ssize_t written = 0;
 //    printf("%d to %d (%d): starting with (%ld, %ld)\n", info->selfId, dst, msg->s_header.s_type, written, toWrite);
     while (written != toWrite) {
-//        printf("%d to %d (%d): write to %d, %ld, %ld\n", info->selfId, dst, msg->s_header.s_type, info->pipes[dst].write, buf + written, toWrite - written);
+//        printf("%d: %d to %d (%d): write to %d, %ld, %ld\n", get_lamport_time(), info->selfId, dst, msg->s_header.s_type, info->pipes[dst].write, buf + written, toWrite - written);
         ssize_t res = write(info->pipes[dst].write, buf + written, toWrite - written);
         int errn = errno;
 //        printf("%d to %d (%d): write result: (%ld, %d)\n", info->selfId, dst, msg->s_header.s_type, res, errn);
@@ -114,7 +115,7 @@ int receive_any(void *self, Message *msg) {
             nanosleep(&sleepTimeout, NULL);
         }
         if (pipe != info->pipeInfo->selfId) {
-//            printf("process %d reading from %d\n", info->pipeInfo->selfId, pipe);
+//            printf("%d: process %d reading from %d (%d)\n", get_lamport_time(), info->pipeInfo->selfId, pipe, info->pipeInfo->pipes[pipe].read);
             wasRead = read(info->pipeInfo->pipes[pipe].read, buf, toRead);
             if (wasRead == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
                 error(0, errno, "%d receive_any_1: ", info->pipeInfo->selfId);
