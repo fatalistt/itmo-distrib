@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
+  <component name="UnattendedHostPersistenceState">
+    <option name="openedFilesInfos">
+      <list>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="607" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/ipc.h" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="2752" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/child.c" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="774" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/ipc.c" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="1200" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/args.c" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="3718" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/pa2345.c" />
+        </OpenedFileInfo>
+      </list>
+    </option>
+  </component>
+</project>
