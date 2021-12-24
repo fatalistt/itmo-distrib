@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="pa4" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="-p 3" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pa4" TARGET_NAME="pa4" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="pa4" RUN_TARGET_NAME="pa4">
+    <envs>
+      <env name="LD_LIBRARY_PATH" value="$PROJECT_DIR$/lib64" />
+    </envs>
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>
